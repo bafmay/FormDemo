@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:form_validation/src/bloc/provider.dart';
 
 class LoginPage extends StatelessWidget {
   
@@ -66,6 +67,7 @@ class LoginPage extends StatelessWidget {
   }
 
   SingleChildScrollView _crearLoginForm(BuildContext context) {
+    final bloc = Provider.of(context);
     final size = MediaQuery.of(context).size;
 
     return SingleChildScrollView(
@@ -96,11 +98,11 @@ class LoginPage extends StatelessWidget {
               children: <Widget>[
                 Text('Ingreso',style: TextStyle(fontSize: 18.0)),
                 SizedBox(height: 30.0),
-                _crearEmail(),
+                _crearEmail(bloc),
                 SizedBox(height: 10.0),
-                _crearPassword(),
+                _crearPassword(bloc),
                 SizedBox(height: 10.0),
-                _crearBoton()
+                _crearBoton(context,bloc)
               ],
             ),
           ),
@@ -111,47 +113,78 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _crearEmail() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: TextField(
-        keyboardType: TextInputType.emailAddress,
-        decoration: InputDecoration(
-          icon: Icon(Icons.alternate_email,color: Colors.deepPurple),
-          hintText: 'ejemplo@correo.com',
-          labelText: 'Correo electrónico'
-        )
-      )
+  Widget _crearEmail(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.emailStream,
+      builder: (context,AsyncSnapshot snapshot){
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: TextField(
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              icon: Icon(Icons.alternate_email,color: Colors.deepPurple),
+              hintText: 'ejemplo@correo.com',
+              labelText: 'Correo electrónico',
+              counterText: snapshot.data,
+              errorText: snapshot.error
+            ),
+            onChanged: bloc.changeEmail,
+          )
+        ); 
+      }
     );
   }
 
-  Widget _crearPassword() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: TextField(
-        obscureText: true,
-        decoration: InputDecoration(
-          icon: Icon(Icons.lock_outline,color: Colors.deepPurple),
-          labelText: 'Contraseña'
-        )
-      )
+  Widget _crearPassword(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.passwordStream,
+      builder: (context,snapshot){
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: TextField(
+            obscureText: true,
+            decoration: InputDecoration(
+              icon: Icon(Icons.lock_outline,color: Colors.deepPurple),
+              labelText: 'Contraseña',
+              counterText: snapshot.data,
+              errorText: snapshot.error
+            ),
+            onChanged: bloc.changePassword,
+          )
+        );
+      }
     );
   }
 
-  Widget _crearBoton(){
-    return RaisedButton(
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 60.0,vertical: 10.0),
-        child: Text('Ingresar'),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5.0)
-      ),
-      elevation: 0.0,
-      color: Colors.deepPurple,
-      textColor: Colors.white,
-      onPressed: (){}
+  Widget _crearBoton(BuildContext context, LoginBloc bloc){
+
+    return StreamBuilder(
+      stream: bloc.formValidStream,
+      builder: (context,snapshot){
+        return RaisedButton(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 60.0,vertical: 10.0),
+            child: Text('Ingresar'),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5.0)
+          ),
+          elevation: 0.0,
+          color: Colors.deepPurple,
+          textColor: Colors.white,
+          onPressed: snapshot.hasData ? () => _login(context, bloc) : null
+        );
+      }
     );
+
+  }
+
+  _login(BuildContext context, LoginBloc bloc){
+    print('===================');
+    print('Email: ${bloc.email}');
+    print('Password: ${bloc.password}');
+    print('===================');
+    Navigator.pushReplacementNamed(context, 'home');
   }
 
 }
