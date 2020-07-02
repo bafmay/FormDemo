@@ -3,19 +3,30 @@ import 'package:form_validation/src/bloc/provider.dart';
 import 'package:form_validation/src/pages/home_page.dart';
 import 'package:form_validation/src/pages/login_page.dart';
 import 'package:form_validation/src/pages/producto_page.dart';
+import 'package:form_validation/src/pages/register_page.dart';
+import 'package:form_validation/src/preferencias/preferencias_usuario.dart';
  
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = PreferenciasUsuario();
+  await prefs.initPrefs();
+
+  runApp(MyApp());
+} 
  
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final prefs = PreferenciasUsuario();
+    print(prefs.token);
     
     final mateapp = MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Material App',
-      initialRoute: 'home',
+      initialRoute: 'login',
       routes: {
         'login'     : (BuildContext context) => LoginPage(),
+        'registro'     : (BuildContext context) => RegistroPage(),
         'home'      : (BuildContext context) => HomePage(),
         'producto'  : (BuildContext context) => ProductoPage()
       },
